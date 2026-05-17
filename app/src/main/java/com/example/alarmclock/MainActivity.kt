@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri // <-- Added this critical import!
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -24,6 +25,18 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
+            }
+        }
+
+        // Check for overlay permissions to automatically pop open while device is awake
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+                startActivity(intent)
+                Toast.makeText(this, "Please enable 'Display over other apps' for the alarm to open automatically", Toast.LENGTH_LONG).show()
             }
         }
 
@@ -51,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             if (checkAlarmPermission()) {
                 saveAlarmToDisk(calendar.timeInMillis)
                 scheduleAlarm(calendar.timeInMillis)
-                
+
                 val timeText = String.format("%02d:%02d", timePicker.hour, timePicker.minute)
                 Toast.makeText(this, "Alarm set for $timeText", Toast.LENGTH_LONG).show()
             }
@@ -79,11 +92,11 @@ class MainActivity : AppCompatActivity() {
     private fun scheduleAlarm(timeInMillis: Long) {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, AlarmReceiver::class.java)
-        
+
         val pendingIntent = PendingIntent.getBroadcast(
-            this, 
+            this,
             12345, // Explicit request code to overwrite cache
-            intent, 
+            intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
