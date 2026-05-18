@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Background layers -->
+    <color name="bg_deep">#090B10</color>
+    <color name="bg_surface">#111520</color>
+    <color name="bg_card">#181D2E</color>
+
+    <!-- Accent -->
+    <color name="alarm_red">#FF3B3B</color>
+    <color name="alarm_red_dim">#661818</color>
+
+    <!-- Text -->
+    <color name="text_primary">#E8ECF4</color>
+    <color name="text_secondary">#5A6480</color>
+    <color name="text_dim">#2E3450</color>
+
+    <!-- Switch track colours (referenced from theme) -->
+    <color name="switch_track_off">#2E3450</color>
+    <color name="switch_thumb_off">#5A6480</color>
 </resources>

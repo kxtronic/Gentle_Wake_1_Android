@@ -8,8 +8,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import android.view.WindowManager
-import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
+import java.util.Calendar
 
 class AlarmActivity : AppCompatActivity() {
 
@@ -19,35 +21,42 @@ class AlarmActivity : AppCompatActivity() {
     private var wakeLock: PowerManager.WakeLock? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // 1. MUST register lock screen breakthroughs BEFORE super.onCreate or setContentView
         setupLockScreenFlags()
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_alarm)
 
-        // 2. Force hardware CPU to stay awake for audio calculations
         acquireWakeLock()
 
-        // 3. Bind UI interaction elements
-        findViewById<Button>(R.id.btnDismiss).setOnClickListener {
+        // Show the alarm time on the ringing screen
+        val prefs = getSharedPreferences("AlarmPrefs", Context.MODE_PRIVATE)
+        val hour   = prefs.getInt("ALARM_HOUR",   -1)
+        val minute = prefs.getInt("ALARM_MINUTE", -1)
+        if (hour >= 0 && minute >= 0) {
+            findViewById<TextView>(R.id.tvAlarmRingTime).text =
+                String.format("%02d:%02d", hour, minute)
+        }
+
+        // Clear alarm-on flag so the main screen resets its switch after dismiss
+        prefs.edit()
+            .putBoolean("ALARM_ON", false)
+            .remove("ALARM_TIME")
+            .apply()
+
+        findViewById<MaterialButton>(R.id.btnDismiss).setOnClickListener {
             stopAlarm()
             finish()
         }
 
-        // 4. Fire the audio mechanism
         startQuadraticAlarm()
     }
 
     private fun setupLockScreenFlags() {
-        // Handle O_MR1 (Android 8.1 / API 27) and newer modern background window states
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
             val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
             keyguardManager.requestDismissKeyguard(this, null)
         }
-
-        // Reinforce and force window layer behaviors for persistent custom skins
         window.addFlags(
             WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
                     WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON or
@@ -62,7 +71,7 @@ class AlarmActivity : AppCompatActivity() {
             PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
             "QuadraticAlarm:WakeLockTag"
         )
-        wakeLock?.acquire(60 * 1000L) // Safety cap at 1 minute
+        wakeLock?.acquire(60 * 1000L)
     }
 
     private fun startQuadraticAlarm() {
@@ -72,7 +81,6 @@ class AlarmActivity : AppCompatActivity() {
             .setUsage(AudioAttributes.USAGE_ALARM)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
-
         mediaPlayer?.setAudioAttributes(attributes)
 
         mediaPlayer?.setOnCompletionListener {
@@ -87,10 +95,10 @@ class AlarmActivity : AppCompatActivity() {
     }
 
     private fun playDing() {
-        val progress = dingCount.toDouble() / maxDings.toDouble()
-        val baseVolume = 0.15f
+        val progress      = dingCount.toDouble() / maxDings.toDouble()
+        val baseVolume    = 0.15f
         val quadraticPart = (progress * progress).toFloat()
-        val finalVolume = (baseVolume + (0.85f * quadraticPart)).coerceAtMost(1.0f)
+        val finalVolume   = (baseVolume + (0.85f * quadraticPart)).coerceAtMost(1.0f)
 
         mediaPlayer?.setVolume(finalVolume, finalVolume)
         mediaPlayer?.start()
@@ -102,10 +110,7 @@ class AlarmActivity : AppCompatActivity() {
             release()
         }
         mediaPlayer = null
-
-        if (wakeLock?.isHeld == true) {
-            wakeLock?.release()
-        }
+        if (wakeLock?.isHeld == true) wakeLock?.release()
     }
 
     override fun onDestroy() {
