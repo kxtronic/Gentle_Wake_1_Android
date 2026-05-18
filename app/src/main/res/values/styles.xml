@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ═══════════════════════════════════════════
+         Base application theme — deep space dark
+         ═══════════════════════════════════════════ -->
+    <style name="Theme.AlarmClock" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:windowBackground">@color/bg_deep</item>
+        <item name="android:statusBarColor">@color/bg_deep</item>
+        <item name="android:navigationBarColor">@color/bg_deep</item>
+        <item name="colorPrimary">@color/alarm_red</item>
+        <item name="colorPrimaryVariant">@color/alarm_red_dim</item>
+        <item name="colorOnPrimary">@color/text_primary</item>
+        <item name="colorSurface">@color/bg_surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <!-- Switch thumb / track -->
+        <item name="colorControlActivated">@color/alarm_red</item>
+        <item name="colorSwitchThumbNormal">@color/switch_thumb_off</item>
+        <item name="android:colorForeground">@color/text_primary</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════
+         TimePicker screen — same dark base
+         ═══════════════════════════════════════════ -->
+    <style name="Theme.AlarmClock.TimePicker" parent="Theme.AlarmClock" />
+
+    <!-- ═══════════════════════════════════════════
+         Alarm firing screen
+         ═══════════════════════════════════════════ -->
+    <style name="Theme.AlarmClock.Alarm" parent="Theme.AlarmClock">
+        <item name="android:windowBackground">@color/bg_deep</item>
+    </style>
+
+</resources>
