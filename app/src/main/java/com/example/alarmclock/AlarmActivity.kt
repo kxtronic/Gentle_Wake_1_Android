@@ -5,6 +5,8 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.Bundle
 import android.os.PowerManager
 import android.view.WindowManager
@@ -71,8 +73,10 @@ class AlarmActivity : AppCompatActivity() {
             PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
             "QuadraticAlarm:WakeLockTag"
         )
-        wakeLock?.acquire(60 * 1000L)
+        wakeLock?.acquire(11 * 60 * 1000L) // 10 dings × 1 min + 1 min buffer
     }
+
+    private val handler = Handler(Looper.getMainLooper())
 
     private fun startQuadraticAlarm() {
         mediaPlayer = MediaPlayer.create(this, R.raw.ding) ?: return
@@ -86,7 +90,7 @@ class AlarmActivity : AppCompatActivity() {
         mediaPlayer?.setOnCompletionListener {
             if (dingCount < maxDings) {
                 dingCount++
-                playDing()
+                handler.postDelayed({ playDing() }, 60_000L)
             } else {
                 stopAlarm()
             }
@@ -105,6 +109,7 @@ class AlarmActivity : AppCompatActivity() {
     }
 
     private fun stopAlarm() {
+        handler.removeCallbacksAndMessages(null)
         mediaPlayer?.apply {
             if (isPlaying) stop()
             release()
