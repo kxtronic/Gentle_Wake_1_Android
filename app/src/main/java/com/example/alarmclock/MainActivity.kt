@@ -32,8 +32,11 @@ class MainActivity : AppCompatActivity() {
                 if (hour >= 0 && minute >= 0) {
                     saveChosenTime(hour, minute)
                     updateAlarmTimeDisplay(hour, minute)
-                    // If the switch is already ON, reschedule immediately
-                    if (switchAlarm.isChecked) scheduleAlarmAt(hour, minute)
+                    // If the switch is already ON, reschedule and refresh the countdown
+                    if (switchAlarm.isChecked) {
+                        scheduleAlarmAt(hour, minute)
+                        applyAlarmActiveStyle(true)
+                    }
                 }
             }
         }

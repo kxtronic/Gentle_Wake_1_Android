@@ -5,15 +5,14 @@ import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.os.Build
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.Bundle
 import android.os.PowerManager
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
-import java.util.Calendar
 
 class AlarmActivity : AppCompatActivity() {
 
@@ -21,6 +20,8 @@ class AlarmActivity : AppCompatActivity() {
     private var dingCount = 1
     private val maxDings = 10
     private var wakeLock: PowerManager.WakeLock? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private var alarmExpired = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setupLockScreenFlags()
@@ -29,8 +30,12 @@ class AlarmActivity : AppCompatActivity() {
 
         acquireWakeLock()
 
-        // Show the alarm time on the ringing screen
+        // Restore expired state across rotation / app switching
         val prefs = getSharedPreferences("AlarmPrefs", Context.MODE_PRIVATE)
+        alarmExpired = savedInstanceState?.getBoolean("ALARM_EXPIRED", false)
+            ?: prefs.getBoolean("ALARM_EXPIRED", false)
+
+        // Show the alarm time
         val hour   = prefs.getInt("ALARM_HOUR",   -1)
         val minute = prefs.getInt("ALARM_MINUTE", -1)
         if (hour >= 0 && minute >= 0) {
@@ -44,12 +49,29 @@ class AlarmActivity : AppCompatActivity() {
             .remove("ALARM_TIME")
             .apply()
 
-        findViewById<MaterialButton>(R.id.btnDismiss).setOnClickListener {
-            stopAlarm()
-            finish()
+        if (alarmExpired) {
+            // Recreated after expiry — just show the expired label, don't replay
+            showExpired()
+        } else {
+            startQuadraticAlarm()
         }
 
-        startQuadraticAlarm()
+        findViewById<MaterialButton>(R.id.btnDismiss).setOnClickListener {
+            stopAlarm()
+            // Clear the expired flag when the user consciously dismisses
+            getSharedPreferences("AlarmPrefs", Context.MODE_PRIVATE)
+                .edit().remove("ALARM_EXPIRED").apply()
+            finish()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("ALARM_EXPIRED", alarmExpired)
+    }
+
+    private fun showExpired() {
+        findViewById<TextView>(R.id.tvWakeUp).text = "Alarm Expired"
     }
 
     private fun setupLockScreenFlags() {
@@ -73,10 +95,8 @@ class AlarmActivity : AppCompatActivity() {
             PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
             "QuadraticAlarm:WakeLockTag"
         )
-        wakeLock?.acquire(11 * 60 * 1000L) // 10 dings × 1 min + 1 min buffer
+        wakeLock?.acquire(11 * 60 * 1000L)
     }
-
-    private val handler = Handler(Looper.getMainLooper())
 
     private fun startQuadraticAlarm() {
         mediaPlayer = MediaPlayer.create(this, R.raw.ding) ?: return
@@ -92,7 +112,12 @@ class AlarmActivity : AppCompatActivity() {
                 dingCount++
                 handler.postDelayed({ playDing() }, 60_000L)
             } else {
+                alarmExpired = true
+                // Persist so the state survives app switching
+                getSharedPreferences("AlarmPrefs", Context.MODE_PRIVATE)
+                    .edit().putBoolean("ALARM_EXPIRED", true).apply()
                 stopAlarm()
+                runOnUiThread { showExpired() }
             }
         }
         playDing()

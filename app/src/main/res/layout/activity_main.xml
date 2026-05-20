@@ -85,25 +85,25 @@
             <!-- Tappable alarm time — opens TimePickerActivity -->
             <TextView
                 android:id="@+id/tvAlarmTime"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="--:--"
-                android:textSize="144sp"
-                android:scaleX="0.5"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="72sp"
-                android:autoSizeMaxTextSize="144sp"
+                android:textSize="72sp"
+                android:scaleY="2.0"
+                android:gravity="start"
                 android:letterSpacing="-0.03"
                 android:includeFontPadding="false"
                 android:textColor="@color/text_secondary"
                 android:layout_marginTop="12dp"
+                android:layout_marginStart="48dp"
+                android:layout_marginEnd="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
                 android:contentDescription="Tap to set alarm time"
                 app:layout_constraintTop_toBottomOf="@id/tvAlarmLabel"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toStartOf="@id/switchAlarm" />
 
             <!-- Edit hint below time -->
             <LinearLayout
