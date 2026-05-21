@@ -35,13 +35,8 @@ class AlarmActivity : AppCompatActivity() {
         alarmExpired = savedInstanceState?.getBoolean("ALARM_EXPIRED", false)
             ?: prefs.getBoolean("ALARM_EXPIRED", false)
 
-        // Show the alarm time
-        val hour   = prefs.getInt("ALARM_HOUR",   -1)
-        val minute = prefs.getInt("ALARM_MINUTE", -1)
-        if (hour >= 0 && minute >= 0) {
-            findViewById<TextView>(R.id.tvAlarmRingTime).text =
-                String.format("%02d:%02d", hour, minute)
-        }
+        tvAlarmRingTime = findViewById(R.id.tvAlarmRingTime)
+        startClock()
 
         // Clear alarm-on flag so the main screen resets its switch after dismiss
         prefs.edit()
@@ -68,6 +63,24 @@ class AlarmActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putBoolean("ALARM_EXPIRED", alarmExpired)
+    }
+
+    private lateinit var tvAlarmRingTime: TextView
+
+    private val clockRunnable = object : Runnable {
+        override fun run() {
+            val now    = java.util.Calendar.getInstance()
+            val hour   = now.get(java.util.Calendar.HOUR_OF_DAY)
+            val minute = now.get(java.util.Calendar.MINUTE)
+            tvAlarmRingTime.text = String.format("%02d:%02d", hour, minute)
+            // Schedule next tick at the start of the next minute
+            val secondsLeft = 60 - now.get(java.util.Calendar.SECOND)
+            handler.postDelayed(this, secondsLeft * 1000L)
+        }
+    }
+
+    private fun startClock() {
+        clockRunnable.run() // show immediately, then self-schedules
     }
 
     private fun showExpired() {

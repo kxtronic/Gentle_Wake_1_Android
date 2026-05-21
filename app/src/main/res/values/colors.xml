@@ -15,6 +15,6 @@
     <color name="text_dim">#2E3450</color>
 
     <!-- Switch track colours (referenced from theme) -->
-    <color name="switch_track_off">#2E3450</color>
+    <color name="current_time">#99E6FF</color>
     <color name="switch_thumb_off">#5A6480</color>
 </resources>

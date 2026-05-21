@@ -54,6 +54,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:paddingTop="28dp"
@@ -72,7 +74,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- Switch (top-right of card) -->
+            <!-- Switch — fixed right column -->
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/switchAlarm"
                 android:layout_width="wrap_content"
@@ -80,41 +82,54 @@
                 android:checked="false"
                 android:contentDescription="Enable alarm"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
-            <!-- Tappable alarm time — opens TimePickerActivity -->
-            <TextView
-                android:id="@+id/tvAlarmTime"
+            <!-- Container: left edge → switch, alarm time centred within -->
+            <FrameLayout
+                android:id="@+id/containerAlarmTime"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="--:--"
-                android:textSize="72sp"
-                android:scaleY="2.0"
-                android:gravity="start"
-                android:letterSpacing="-0.03"
-                android:includeFontPadding="false"
-                android:textColor="@color/text_secondary"
+                android:paddingTop="24dp"
+                android:paddingBottom="24dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
                 android:layout_marginTop="12dp"
-                android:layout_marginStart="48dp"
-                android:layout_marginEnd="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                android:contentDescription="Tap to set alarm time"
+                android:layout_marginBottom="12dp"
                 app:layout_constraintTop_toBottomOf="@id/tvAlarmLabel"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/switchAlarm" />
+                app:layout_constraintEnd_toStartOf="@id/switchAlarm">
 
-            <!-- Edit hint below time -->
+                <!-- Tappable alarm time — opens TimePickerActivity -->
+                <TextView
+                    android:id="@+id/tvAlarmTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="--:--"
+                    android:textSize="72sp"
+                    android:scaleY="2.0"
+                    android:letterSpacing="-0.03"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/text_secondary"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:contentDescription="Tap to set alarm time" />
+
+            </FrameLayout>
+
+            <!-- Edit hint below the container -->
             <LinearLayout
                 android:id="@+id/rowEditHint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="6dp"
-                app:layout_constraintTop_toBottomOf="@id/tvAlarmTime"
-                app:layout_constraintStart_toStartOf="parent">
+                android:layout_marginTop="4dp"
+                app:layout_constraintTop_toBottomOf="@id/containerAlarmTime"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/switchAlarm">
 
                 <ImageView
                     android:id="@+id/ivEditHint"
