@@ -108,7 +108,7 @@ class AlarmActivity : AppCompatActivity() {
             PowerManager.PARTIAL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
             "QuadraticAlarm:WakeLockTag"
         )
-        wakeLock?.acquire(11 * 60 * 1000L)
+        wakeLock?.acquire(25 * 60 * 1000L) // covers 10 dings × 120s max + buffer
     }
 
     private fun startQuadraticAlarm() {
@@ -123,7 +123,10 @@ class AlarmActivity : AppCompatActivity() {
         mediaPlayer?.setOnCompletionListener {
             if (dingCount < maxDings) {
                 dingCount++
-                handler.postDelayed({ playDing() }, 60_000L)
+                val intervalMs = getSharedPreferences("AlarmPrefs", Context.MODE_PRIVATE)
+                    .getInt(ConfigActivity.KEY_DING_INTERVAL, ConfigActivity.DEFAULT_DING_SECS)
+                    .toLong() * 1000L
+                handler.postDelayed({ playDing() }, intervalMs)
             } else {
                 alarmExpired = true
                 // Persist so the state survives app switching
