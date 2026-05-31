@@ -82,7 +82,6 @@ class MainActivity : AppCompatActivity() {
 
             if (isChecked) {
                 if (h < 0 || m < 0) {
-                    // No time chosen yet — open picker first
                     switchAlarm.isChecked = false
                     Toast.makeText(this, "Tap the time to set an alarm first", Toast.LENGTH_SHORT).show()
                     return@setOnCheckedChangeListener
@@ -91,8 +90,7 @@ class MainActivity : AppCompatActivity() {
                     scheduleAlarmAt(h, m)
                     prefs.edit().putBoolean("ALARM_ON", true).apply()
                     applyAlarmActiveStyle(true)
-                    val timeText = String.format("%02d:%02d", h, m)
-                    Toast.makeText(this, "Alarm set for $timeText", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Alarm set for ${formatTime(h, m)}", Toast.LENGTH_SHORT).show()
                 } else {
                     switchAlarm.isChecked = false
                 }
@@ -103,6 +101,23 @@ class MainActivity : AppCompatActivity() {
                 tvAlarmStatus.text = ""
             }
         }
+
+        // ── Settings and Help buttons ─────────────────────────
+        findViewById<android.widget.ImageButton>(R.id.btnSettings).setOnClickListener {
+            startActivity(Intent(this, ConfigActivity::class.java))
+        }
+        findViewById<android.widget.ImageButton>(R.id.btnHelp).setOnClickListener {
+            startActivity(Intent(this, HelpActivity::class.java))
+        }
+    }
+
+    // ── Refresh display when returning from Settings ──────────────────────────
+    override fun onResume() {
+        super.onResume()
+        val prefs = getSharedPreferences("AlarmPrefs", Context.MODE_PRIVATE)
+        val h = prefs.getInt("ALARM_HOUR",   -1)
+        val m = prefs.getInt("ALARM_MINUTE", -1)
+        if (h >= 0 && m >= 0) updateAlarmTimeDisplay(h, m)
     }
 
     // ── Visual state: red when armed ──────────────────────────────────────────
@@ -128,7 +143,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateAlarmTimeDisplay(hour: Int, minute: Int) {
-        tvAlarmTime.text = String.format("%02d:%02d", hour, minute)
+        tvAlarmTime.text = formatTime(hour, minute)
+    }
+
+    private fun formatTime(hour: Int, minute: Int): String {
+        val use24h = getSharedPreferences("AlarmPrefs", Context.MODE_PRIVATE)
+            .getBoolean(ConfigActivity.KEY_24H, false)
+        return if (use24h) {
+            String.format("%02d:%02d", hour, minute)
+        } else {
+            val h12  = if (hour % 12 == 0) 12 else hour % 12
+            val ampm = if (hour < 12) "AM" else "PM"
+            String.format("%d:%02d %s", h12, minute, ampm)
+        }
     }
 
     // ── Alarm scheduling ─────────────────────────────────────────────────────
