@@ -1,4 +1,4 @@
-package com.example.alarmclock
+package com.kxtronic.gentlewake
 
 import android.content.Context
 import android.os.Bundle

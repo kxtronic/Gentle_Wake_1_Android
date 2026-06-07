@@ -1,4 +1,4 @@
-package com.example.alarmclock
+package com.kxtronic.gentlewake
 
 import org.junit.Test
 

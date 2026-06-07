@@ -1,4 +1,4 @@
-package com.example.alarmclock
+package com.kxtronic.gentlewake
 
 import android.app.AlarmManager
 import android.app.PendingIntent

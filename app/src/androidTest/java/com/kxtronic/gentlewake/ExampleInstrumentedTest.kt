@@ -1,4 +1,4 @@
-package com.example.alarmclock
+package com.kxtronic.gentlewake
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

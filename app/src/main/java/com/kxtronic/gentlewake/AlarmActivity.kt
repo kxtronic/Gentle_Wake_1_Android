@@ -1,4 +1,4 @@
-package com.example.alarmclock
+package com.kxtronic.gentlewake
 
 import android.app.KeyguardManager
 import android.content.Context
@@ -29,6 +29,12 @@ class AlarmActivity : AppCompatActivity() {
         setContentView(R.layout.activity_alarm)
 
         acquireWakeLock()
+
+        // Cancel the notification immediately — it has done its job of
+        // launching this screen, and leaving it active causes the LED to flash
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
+                as android.app.NotificationManager
+        notificationManager.cancel(1001)
 
         // Restore expired state across rotation / app switching
         val prefs = getSharedPreferences("AlarmPrefs", Context.MODE_PRIVATE)

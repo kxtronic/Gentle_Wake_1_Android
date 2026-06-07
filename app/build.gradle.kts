@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.alarmclock"
+    namespace = "com.kxtronic.gentlewake"
     compileSdk = 36
 
     defaultConfig {
